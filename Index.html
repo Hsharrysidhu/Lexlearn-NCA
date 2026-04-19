@@ -340,6 +340,8 @@ async function callClaudeWithSearch(sys,msgs,userMsg){
   const fullSys=sys+(searchContext?searchContext:"");
   return callClaude(fullSys,msgs);
 }
+
+async function loadLecs(c){
   if(!S.sbUrl||!S.sbKey){ss({lecError:"Add Supabase credentials in Settings."});return;}
   ss({lecLoading:true,lecError:""});
   try{
