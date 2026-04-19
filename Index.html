@@ -284,7 +284,7 @@ async function testAPI(){
   // Test Claude
   if(S.apiKey){
     try{
-      await callClaude("Reply with one word: working","[{\"role\":\"user\",\"content\":\"test\"}]");
+      await callClaude("Reply with one word: working",[{role:"user",content:"test"}]);
       results.claude={ok:true,msg:"Claude API connected"};
     }catch(e){results.claude={ok:false,msg:"Claude: "+e.message};}
   }else results.claude={ok:false,msg:"No Claude key entered"};
