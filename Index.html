@@ -193,6 +193,7 @@ let S={
   apiKey:localStorage.getItem("ll_ak")||"",
   sbUrl:localStorage.getItem("ll_su")||"",
   sbKey:localStorage.getItem("ll_sk")||"",
+  tvKey:localStorage.getItem("ll_tv")||"",
   showSettings:false,
   showHints:false,
   testingApi:false,
@@ -296,10 +297,49 @@ async function testAPI(){
       results.supabase={ok:true,msg:"Supabase connected"};
     }catch(e){results.supabase={ok:false,msg:"Supabase: "+e.message};}
   }else results.supabase={ok:false,msg:"No Supabase credentials"};
+  // Test Tavily
+  if(S.tvKey){
+    try{
+      const tr=await fetch("https://api.tavily.com/search",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({api_key:S.tvKey,query:"test",max_results:1}),
+      });
+      if(!tr.ok)throw new Error("HTTP "+tr.status);
+      results.tavily={ok:true,msg:"Tavily Search connected"};
+    }catch(e){results.tavily={ok:false,msg:"Tavily: "+e.message};}
+  }else results.tavily={ok:false,msg:"No Tavily key (optional)"};
   ss({testingApi:false,testResult:results});
 }
 
-async function loadLecs(c){
+async function tavilySearch(query){
+  if(!S.tvKey)return null;
+  try{
+    const r=await fetch("https://api.tavily.com/search",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({api_key:S.tvKey,query:query,search_depth:"basic",max_results:3}),
+    });
+    if(!r.ok)return null;
+    const d=await r.json();
+    return d.results.map(function(x){return x.title+": "+x.content;}).join("\n\n");
+  }catch(e){return null;}
+}
+
+async function callClaudeWithSearch(sys,msgs,userMsg){
+  // If Tavily connected, search for legal context first
+  let searchContext="";
+  if(S.tvKey&&userMsg){
+    const legalTerms=["case","rule","section","act","court","decision","canada","nca","model code","charter","canlii"];
+    const isLegal=legalTerms.some(function(t){return userMsg.toLowerCase().includes(t);});
+    if(isLegal){
+      const results=await tavilySearch("Canadian law "+userMsg);
+      if(results)searchContext="\n\nRecent search results for context:\n"+results;
+    }
+  }
+  const fullSys=sys+(searchContext?searchContext:"");
+  return callClaude(fullSys,msgs);
+}
   if(!S.sbUrl||!S.sbKey){ss({lecError:"Add Supabase credentials in Settings."});return;}
   ss({lecLoading:true,lecError:""});
   try{
@@ -435,6 +475,7 @@ function saveSettings(){
   localStorage.setItem("ll_ak",S.apiKey);
   localStorage.setItem("ll_su",S.sbUrl);
   localStorage.setItem("ll_sk",S.sbKey);
+  localStorage.setItem("ll_tv",S.tvKey);
   ss({showSettings:false,lectures:{},testResult:null});
   toast("Settings saved");
 }
@@ -482,6 +523,7 @@ function R(){
     else if(S.testResult){
       testHTML='<div class="test-result" style="background:'+(S.testResult.claude.ok?"rgba(52,232,158,.08)":"rgba(255,107,138,.08)")+';color:'+(S.testResult.claude.ok?"var(--green)":"var(--red)")+'">'+(S.testResult.claude.ok?"✓ ":"✗ ")+S.testResult.claude.msg+'</div>';
       testHTML+='<div class="test-result" style="margin-top:6px;background:'+(S.testResult.supabase.ok?"rgba(52,232,158,.08)":"rgba(255,107,138,.08)")+';color:'+(S.testResult.supabase.ok?"var(--green)":"var(--red)")+'">'+(S.testResult.supabase.ok?"✓ ":"✗ ")+S.testResult.supabase.msg+'</div>';
+      if(S.testResult.tavily)testHTML+='<div class="test-result" style="margin-top:6px;background:'+(S.testResult.tavily.ok?"rgba(52,232,158,.08)":"rgba(255,255,255,.04)")+';color:'+(S.testResult.tavily.ok?"var(--green)":"var(--text3)")+'">'+(S.testResult.tavily.ok?"✓ ":"○ ")+S.testResult.tavily.msg+'</div>';
     }
     h+='<div class="sov" onclick="if(event.target===this)ss({showSettings:false})">'
       +'<div class="sp">'
@@ -492,6 +534,8 @@ function R(){
       +'<input class="si" type="text" placeholder="https://xxxxx.supabase.co" value="'+S.sbUrl+'" oninput="S.sbUrl=this.value"></div>'
       +'<div><div class="sl" style="color:var(--gold)">Supabase Anon Key</div>'
       +'<input class="si" type="password" placeholder="eyJ... or sb_publishable_..." value="'+S.sbKey+'" oninput="S.sbKey=this.value"></div>'
+      +'<div><div class="sl" style="color:var(--green)">Tavily Search API Key (optional)</div>'
+      +'<input class="si" type="password" placeholder="tvly-..." value="'+S.tvKey+'" oninput="S.tvKey=this.value"></div>'
       +testHTML
       +'<button class="stest" onclick="testAPI()" '+(S.testingApi?"disabled":"")+'>🔬 Test Connections</button>'
       +'<div style="display:flex;gap:8px"><button class="ssave" onclick="saveSettings()">Save & Connect</button><button class="scancel" onclick="ss({showSettings:false})">Cancel</button></div>'
