@@ -160,9 +160,10 @@ textarea:focus{border-color:rgba(110,184,255,.4);}
 .lhint strong{color:var(--green);}
 
 /* Diagrams */
-.diag{background:#fff;border-radius:12px;padding:16px;margin:14px 0;overflow-x:auto;}
-.diag-label{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.mermaid{background:#fff;border-radius:10px;padding:10px;}
+.diag{background:#fff;border-radius:12px;padding:16px;margin:14px 0;overflow:auto;max-width:100%;}
+.diag-label{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;background:rgba(0,0,16,.9);padding:6px 10px;border-radius:6px;display:inline-block;}
+.mermaid{background:#fff;border-radius:10px;padding:10px;min-height:300px;text-align:center;}
+.mermaid svg{max-width:none !important;height:auto !important;min-width:600px;}
 
 /* Video cards */
 .videos-section{margin:16px 0;}
@@ -191,7 +192,7 @@ textarea:focus{border-color:rgba(110,184,255,.4);}
 </div>
 
 <script>
-if(window.mermaid){window.mermaid.initialize({startOnLoad:false,theme:"default",securityLevel:"loose"});}
+if(window.mermaid){window.mermaid.initialize({startOnLoad:false,theme:"default",securityLevel:"loose",flowchart:{htmlLabels:true,curve:"basis",useMaxWidth:false,nodeSpacing:50,rankSpacing:50}});}
 const CM={pr:{name:"Professional Responsibility",color:"#6eb8ff"},con:{name:"Constitutional Law",color:"#bf80ff"},admin:{name:"Administrative Law",color:"#ffd060"},crim:{name:"Criminal Law",color:"#34e89e"},found:{name:"Foundations of Canadian Law",color:"#ff6b8a"},torts:{name:"Torts",color:"#ff9a44"}};
 const QK={
   pr:[{i:"🔐",l:"Duty of Confidentiality",q:"Explain the duty of confidentiality under the FLSC Model Code"},{i:"📝",l:"IRAC Practice",q:"Give me a simple real-life IRAC practice scenario"},{i:"🎯",l:"Conflicts of Interest",q:"Explain conflicts of interest simply then quiz me"},{i:"📊",l:"High-Yield Topics",q:"What are the top 5 PR topics for NCA August 2026 exam?"}],
@@ -639,7 +640,7 @@ function R(){
       // Show diagram + videos after first (teacher) message only
       if(i===0&&!u){
         if(S.lec.diagram){
-          h+='<div class="diag"><div class="diag-label">📊 Diagram</div><div class="mermaid" id="mm'+S.lec.id+'">'+S.lec.diagram+'</div></div>';
+          h+='<div class="diag"><div class="diag-label">📊 Diagram — swipe to scroll</div><div class="mermaid" id="mm'+S.lec.id+'">'+S.lec.diagram+'</div></div>';
         }
         if(S.lec.videos&&S.lec.videos.length>0){
           h+='<div class="videos-section"><div class="videos-title">🎥 Related videos</div>';
