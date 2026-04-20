@@ -160,10 +160,10 @@ textarea:focus{border-color:rgba(110,184,255,.4);}
 .lhint strong{color:var(--green);}
 
 /* Diagrams */
-.diag{background:#fff;border-radius:12px;padding:16px;margin:14px 0;overflow:auto;max-width:100%;}
+.diag{background:#fff;border-radius:12px;padding:12px;margin:14px 0;overflow:auto;max-width:100%;min-height:500px;}
 .diag-label{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;background:rgba(0,0,16,.9);padding:6px 10px;border-radius:6px;display:inline-block;}
-.mermaid{background:#fff;border-radius:10px;padding:10px;min-height:300px;text-align:center;}
-.mermaid svg{max-width:none !important;height:auto !important;min-width:600px;}
+.mermaid{background:#fff;border-radius:10px;padding:10px;min-height:450px;text-align:center;overflow:auto;}
+.mermaid svg{max-width:none !important;height:auto !important;min-width:800px;min-height:400px;}
 
 /* Video cards */
 .videos-section{margin:16px 0;}
@@ -640,7 +640,7 @@ function R(){
       // Show diagram + videos after first (teacher) message only
       if(i===0&&!u){
         if(S.lec.diagram){
-          h+='<div class="diag"><div class="diag-label">📊 Diagram — swipe to scroll</div><div class="mermaid" id="mm'+S.lec.id+'"><div style="color:#888;padding:20px;text-align:center;font-size:12px">Loading diagram...</div></div></div>';
+          h+='<div class="diag"><div class="diag-label">📊 Diagram — pinch to zoom, swipe to scroll</div><div class="mermaid" id="mm'+S.lec.id+'"><div style="color:#888;padding:20px;text-align:center;font-size:12px">Loading diagram...</div></div></div>';
         }
         if(S.lec.videos&&S.lec.videos.length>0){
           h+='<div class="videos-section"><div class="videos-title">🎥 Related videos</div>';
