@@ -640,7 +640,7 @@ function R(){
       // Show diagram + videos after first (teacher) message only
       if(i===0&&!u){
         if(S.lec.diagram){
-          h+='<div class="diag"><div class="diag-label">📊 Diagram — swipe to scroll</div><div class="mermaid" id="mm'+S.lec.id+'">'+S.lec.diagram+'</div></div>';
+          h+='<div class="diag"><div class="diag-label">📊 Diagram — swipe to scroll</div><div class="mermaid" id="mm'+S.lec.id+'"><div style="color:#888;padding:20px;text-align:center;font-size:12px">Loading diagram...</div></div></div>';
         }
         if(S.lec.videos&&S.lec.videos.length>0){
           h+='<div class="videos-section"><div class="videos-title">🎥 Related videos</div>';
@@ -660,7 +660,26 @@ function R(){
       +'<button class="sb" '+(S.loading?"disabled":"")+' onclick="sendLec()">'
       +'<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>'
       +'</button></div></div>';
-    root.innerHTML=h;scrollBottom("ls");setTimeout(function(){attachScroll("ls");if(window.mermaid){try{window.mermaid.run();}catch(e){}}},100);return;
+    root.innerHTML=h;scrollBottom("ls");
+    setTimeout(function(){
+      attachScroll("ls");
+      if(window.mermaid&&S.lec&&S.lec.diagram){
+        const el=document.getElementById("mm"+S.lec.id);
+        if(el&&!el.getAttribute("data-processed")){
+          try{
+            window.mermaid.render("mermaidsvg"+S.lec.id,S.lec.diagram).then(function(result){
+              el.innerHTML=result.svg;
+              el.setAttribute("data-processed","true");
+            }).catch(function(err){
+              el.innerHTML='<div style="color:#ff6b8a;padding:10px;font-size:12px">Diagram render failed: '+err.message+'</div>';
+            });
+          }catch(e){
+            el.innerHTML='<div style="color:#ff6b8a;padding:10px;font-size:12px">Diagram error: '+e.message+'</div>';
+          }
+        }
+      }
+    },150);
+    return;
   }
 
   // MAIN SCREEN
